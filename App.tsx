@@ -7,7 +7,8 @@ const supabase = createClient('https://ryxsadnykjzbawhzgukk.supabase.co', 'eyJhb
 function App() {
   const [user, setUser] = useState(null)
   const [isSubscriber, setIsSubscriber] = useState(false)
-
+  const [email, setEmail] = useState('')
+  
   useEffect(() => {
     // Verifica se o usuário está logado
     const session = supabase.auth.getSession()
@@ -29,20 +30,34 @@ function App() {
     if (data?.plano_ativo) setIsSubscriber(true)
   }
 
-  async function login() {
-    await supabase.auth.signInWithOAuth({ provider: 'google' })
-  }
+  async function loginComEmail() {
+  const { error } = await supabase.auth.signInWithOtp({
+    email: email,
+    options: {
+      emailRedirectTo: window.location.origin, // Manda o usuário de volta para o seu site
+    }
+  })
+  if (error) alert("Erro ao enviar e-mail: " + error.message)
+  else alert("Verifique sua caixa de entrada! Enviamos um link de acesso.")
+}
 
-  // TELA DE LOGIN
-  if (!user) {
-    return (
-      <div style={{ padding: '50px', textAlign: 'center' }}>
-        <h1>Bem-vindo ao Meu App de IA</h1>
-        <button onClick={login}>Entrar com Google</button>
-      </div>
-    )
-  }
-
+// TELA DE LOGIN (Substitua aquela azul por esta)
+if (!user) {
+  return (
+    <div style={{ padding: '50px', textAlign: 'center', backgroundColor: '#f0f2f5', minHeight: '100vh' }}>
+      <h1>Acesse o Sistema</h1>
+      <input 
+        type="email" 
+        placeholder="Seu e-mail melhor" 
+        onChange={(e) => setEmail(e.target.value)}
+        style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', marginRight: '10px' }}
+      />
+      <button onClick={loginComEmail} style={{ padding: '10px 20px', cursor: 'pointer' }}>
+        Receber Link de Acesso
+      </button>
+    </div>
+  )
+}
   // TELA DE PAGAMENTO (Se logado mas não pagou)
   if (!isSubscriber) {
     return (
