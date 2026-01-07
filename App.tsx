@@ -4,12 +4,12 @@ import { MessageSquarePlus, Globe, LogOut } from 'lucide-react';
 import { createClient } from '@supabase/supabase-js';
 
 // Seus componentes originais
-import Layout from './Layout';
-import Home from './Home';
-import MeuDinheiro from './MeuDinheiro';
-import BusinessMoney from './BusinessMoney';
-import Brasil from './Brasil';
-import Chatbot from './Chatbot';
+import Layout from './components/Layout';
+import Home from './pages/Home';
+import MeuDinheiro from '/pages/MeuDinheiro';
+import BusinessMoney from './pages/BusinessMoney';
+import Brasil from './pages/Brasil';
+import Chatbot from './components/Chatbot';
 
 // 1. CONFIGURAÇÃO (Troque pelos seus dados do Supabase)
 const supabase = createClient('https://ryxsadnykjzbawhzgukk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5eHNhZG55a2p6YmF3aHpndWtrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MTQzMDIsImV4cCI6MjA4MzI5MDMwMn0.R1hK6lUSI31Z5bPzl0LJC3JNO5OnpU4ihNlLakdz4PQ');

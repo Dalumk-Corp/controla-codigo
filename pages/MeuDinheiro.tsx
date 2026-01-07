@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Bot, LineChart, Loader2 } from 'lucide-react';
-import Card from '../Card';
+import Card from '../components/ui/Card';
 import { analyzeFinancialData } from '../services/geminiService';
 
 const mockTransactions = [

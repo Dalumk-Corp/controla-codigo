@@ -2,7 +2,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Wallet, Briefcase, MapPin } from "lucide-react";
-import Card from "@/ui/Card";
+import Card from "@/components/ui/Card";
 import AnimatedBackground from "@/AnimatedBackground";
 
 const Home: React.FC = () => {
