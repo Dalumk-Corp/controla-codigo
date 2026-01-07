@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Edit, Image as ImageIcon, UploadCloud, Loader2, Wand2 } from 'lucide-react';
-import Card from '../components/ui/Card';
+import Card from '../Card';
 import { editImage } from '../services/geminiService';
 
 const BusinessMoney: React.FC = () => {
