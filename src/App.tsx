@@ -1,18 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route } from 'react-router-dom';
 import { MessageSquarePlus, Globe, LogOut } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from './supabaseClient'; 
 
-// Seus componentes originais
+// Seus componentes (Corrigidos)
 import Layout from './components/Layout';
 import Home from './pages/Home';
-import MeuDinheiro from '/pages/MeuDinheiro';
+import MeuDinheiro from './pages/MeuDinheiro'; // Ponto corrigido aqui
 import BusinessMoney from './pages/BusinessMoney';
 import Brasil from './pages/Brasil';
 import Chatbot from './components/Chatbot';
 
-// 1. CONFIGURAÇÃO (Troque pelos seus dados do Supabase)
-const supabase = createClient('https://ryxsadnykjzbawhzgukk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ5eHNhZG55a2p6YmF3aHpndWtrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3MTQzMDIsImV4cCI6MjA4MzI5MDMwMn0.R1hK6lUSI31Z5bPzl0LJC3JNO5OnpU4ihNlLakdz4PQ');
 
 function App() {
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
@@ -27,9 +25,19 @@ function App() {
       if (session?.user) verificarAcesso(session.user.id);
       else setLoading(false);
     });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    setUser(session?.user ?? null);
+    if (!session) {
+      setAssinante(false);
+      setLoading(false);
+    }
+  });
+
+  return () => subscription.unsubscribe();
   }, []);
 
-  async function verificarAcesso(userId) {
+    async function verificarAcesso(userId) {
     try {
       const { data } = await supabase
         .from('assinantes')
@@ -50,6 +58,14 @@ function App() {
     }
     setLoading(false);
   }
+   
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    setUser(null);          // Limpa o usuário da memória
+    setAssinante(false);    // Limpa o status de assinante
+    window.location.hash = '#/'; // Volta para a home
+  }
+  // -----------------------------
 
   if (loading) return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center text-white">
@@ -88,10 +104,14 @@ function App() {
           </Route>
         </Routes>
         
-        {/* Botão Sair */}
-        <button onClick={() => supabase.auth.signOut()} className="fixed bottom-6 left-6 text-gray-500 hover:text-red-500 transition-colors">
+        {/* Botão Sair - Agora chamando a função completa */}
+          <button 
+            onClick={handleLogout} 
+            className="fixed bottom-6 left-6 text-gray-500 hover:text-red-500 transition-colors z-50"
+          >
           <LogOut size={20} />
-        </button>
+          </button>
+  
 
         {/* Chatbot Gemini */}
         <button
@@ -168,3 +188,4 @@ function TelaPagamento({ idioma, email, setIdioma }) {
 }
 
 export default App;
+
