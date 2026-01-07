@@ -1,31 +1,43 @@
 
-import React, { useState } from 'react';
-import { Bot, LineChart, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Bot, LineChart, Loader2, Plus } from 'lucide-react';
 import Card from '../components/ui/Card';
 import { analyzeFinancialData } from '../services/geminiService';
+import { createClient } from '@supabase/supabase-js'; // Importe seu cliente aqui
 
-const mockTransactions = [
-  { id: 1, date: '2024-07-15', description: 'Groceries', category: 'Food', amount: -75.50 },
-  { id: 2, date: '2024-07-14', description: 'Salary', category: 'Income', amount: 2500.00 },
-  { id: 3, date: '2024-07-13', description: 'Gasoline', category: 'Transport', amount: -50.00 },
-  { id: 4, date: '2024-07-12', description: 'Restaurant', category: 'Food', amount: -45.20 },
-  { id: 5, date: '2024-07-10', description: 'Internet Bill', category: 'Utilities', amount: -60.00 },
-  { id: 6, date: '2024-07-09', description: 'Gym Membership', category: 'Health', amount: -40.00 },
-];
+const supabase = createClient('SUA_URL', 'SUA_CHAVE');
 
 const MeuDinheiro: React.FC = () => {
+  const [transactions, setTransactions] = useState<any[]>([]);
   const [analysis, setAnalysis] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isFetching, setIsFetching] = useState(true);
+
+  // 1. CARREGAR DADOS DO BANCO (Busca apenas os dados do usuário logado)
+  useEffect(() => {
+    fetchTransactions();
+  }, []);
+
+  const fetchTransactions = async () => {
+    setIsFetching(true);
+    const { data, error } = await supabase
+      .from('transacoes')
+      .select('*')
+      .order('date', { ascending: false });
+    
+    if (!error) setTransactions(data || []);
+    setIsFetching(false);
+  };
 
   const handleAnalyze = async () => {
     setIsLoading(true);
     setAnalysis('');
     try {
-        const dataString = JSON.stringify(mockTransactions, null, 2);
+        // Agora ele analisa os dados REAIS do usuário
+        const dataString = JSON.stringify(transactions, null, 2);
         const result = await analyzeFinancialData(dataString);
         setAnalysis(result);
     } catch (error) {
-        console.error("Error analyzing data:", error);
         setAnalysis("Sorry, an error occurred while analyzing the data.");
     } finally {
         setIsLoading(false);
@@ -34,38 +46,48 @@ const MeuDinheiro: React.FC = () => {
 
   return (
     <div className="container mx-auto p-6 animate-fade-in">
-      <h1 className="text-4xl font-bold mb-6 text-meu-dinheiro-primary flex items-center gap-3">
+      <h1 className="text-4xl font-bold mb-6 text-meu-dinheiro-primary flex items-center gap-3 text-white">
         <LineChart size={36} /> Meu Dinheiro
       </h1>
+
       <div className="grid md:grid-cols-2 gap-8">
         <Card className="p-6">
-          <h2 className="text-2xl font-semibold mb-4 text-white">Recent Transactions</h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold text-white">Recent Transactions</h2>
+            {/* Aqui você pode adicionar um botão para abrir um formulário de novo gasto futuramente */}
+          </div>
+
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="border-b border-gray-700">
-                  <th className="p-2">Date</th>
-                  <th className="p-2">Description</th>
-                  <th className="p-2">Category</th>
-                  <th className="p-2 text-right">Amount</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockTransactions.map(tx => (
-                  <tr key={tx.id} className="border-b border-gray-800 hover:bg-gray-800/50">
-                    <td className="p-2 text-sm text-gray-400">{tx.date}</td>
-                    <td className="p-2">{tx.description}</td>
-                    <td className="p-2 text-gray-300">{tx.category}</td>
-                    <td className={`p-2 text-right font-medium ${tx.amount > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      ${tx.amount.toFixed(2)}
-                    </td>
+            {isFetching ? <Loader2 className="animate-spin mx-auto text-blue-400" /> : (
+              <table className="w-full text-left">
+                <thead>
+                  <tr className="border-b border-gray-700">
+                    <th className="p-2 text-gray-400 font-medium">Date</th>
+                    <th className="p-2 text-gray-400 font-medium">Description</th>
+                    <th className="p-2 text-gray-400 font-medium text-right">Amount</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {transactions.length === 0 ? (
+                    <tr><td colSpan={3} className="p-4 text-center text-gray-500">No transactions found.</td></tr>
+                  ) : (
+                    transactions.map(tx => (
+                      <tr key={tx.id} className="border-b border-gray-800 hover:bg-gray-800/50">
+                        <td className="p-2 text-sm text-gray-400">{new Date(tx.date).toLocaleDateString()}</td>
+                        <td className="p-2 text-white">{tx.description}</td>
+                        <td className={`p-2 text-right font-medium ${tx.amount > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                          ${Number(tx.amount).toFixed(2)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            )}
           </div>
         </Card>
 
+        {/* Card da IA Gemini (Continua igual, mas agora lê os dados reais) */}
         <Card className="p-6 flex flex-col">
           <h2 className="text-2xl font-semibold mb-4 text-white">AI Financial Advisor</h2>
           <div className="flex-grow bg-gray-900/50 rounded-lg p-4 border border-gray-700 min-h-[200px]">
@@ -76,15 +98,15 @@ const MeuDinheiro: React.FC = () => {
             ) : analysis ? (
                 <div className="prose prose-invert prose-sm text-gray-300 whitespace-pre-wrap">{analysis}</div>
             ) : (
-                <p className="text-gray-400">Click the button below to get an AI-powered analysis of your recent transactions.</p>
+                <p className="text-gray-400">Click to analyze your **actual** data with Gemini Pro.</p>
             )}
           </div>
           <button
             onClick={handleAnalyze}
-            disabled={isLoading}
+            disabled={isLoading || transactions.length === 0}
             className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors disabled:bg-gray-500"
           >
-            {isLoading ? 'Analyzing...' : <><Bot size={20} /> Analyze with Gemini Pro</>}
+            {isLoading ? 'Analyzing...' : <><Bot size={20} /> Analyze Expenses</>}
           </button>
         </Card>
       </div>
