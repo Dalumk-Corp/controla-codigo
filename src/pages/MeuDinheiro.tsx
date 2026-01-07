@@ -3,9 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Bot, LineChart, Loader2, Plus } from 'lucide-react';
 import Card from '../components/ui/Card';
 import { analyzeFinancialData } from '../services/geminiService';
-import { createClient } from '@supabase/supabase-js'; // Importe seu cliente aqui
+import { createClient } from './src/supabaseClient'; // Importe seu cliente aqui
 
-const supabase = createClient('SUA_URL', 'SUA_CHAVE');
 
 const MeuDinheiro: React.FC = () => {
   const [transactions, setTransactions] = useState<any[]>([]);
