@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Search, Loader2, Link as LinkIcon, Globe } from 'lucide-react';
-import Card from '../ui/Card';
+import Card from '../Card';
 import { getGroundedData } from '../services/geminiService';
 import { GroundingSource } from '../types';
 
