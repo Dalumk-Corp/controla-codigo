@@ -38,26 +38,32 @@ function App() {
   }, []);
 
     async function verificarAcesso(userId) {
-    try {
-      const { data } = await supabase
-        .from('assinantes')
-        .select('subscription_status, trial_ends_at')
-        .eq('id', userId)
-        .single();
+  try {
+    const { data, error } = await supabase
+      .from('assinantes')
+      .select('plano_ativo, trial_ends_at') // Nome correto da coluna
+      .eq('id', userId)
+      .single();
 
-      if (data) {
-        const hoje = new Date();
-        const fimTrial = new Date(data.trial_ends_at);
-        // Regra: Acesso se estiver no Trial OU assinatura Ativa
-        if (data.subscription_status === 'active' || fimTrial > hoje) {
-          setAssinante(true);
-        }
+    if (error) throw error;
+
+    if (data) {
+      const hoje = new Date();
+      const fimTrial = data.trial_ends_at ? new Date(data.trial_ends_at) : null;
+
+      // NOVA REGRA: Acesso se plano_ativo for TRUE OU se o Trial ainda não venceu
+      if (data.plano_ativo === true || (fimTrial && fimTrial > hoje)) {
+        setAssinante(true);
+      } else {
+        setAssinante(false);
       }
-    } catch (err) {
-      console.error("Erro ao verificar acesso", err);
     }
-    setLoading(false);
+  } catch (err) {
+    console.error("Erro ao verificar acesso:", err);
+    setAssinante(false);
   }
+  setLoading(false);
+}
    
   async function handleLogout() {
     await supabase.auth.signOut();
