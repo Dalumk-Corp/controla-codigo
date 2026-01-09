@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Wallet, Briefcase, MapPin } from "lucide-react";
 import Card from "../components/ui/Card";
 import AnimatedBackground from "../components/ui/AnimatedBackground";
+import { supabase } from "../supabaseClient";
 
 const Home: React.FC = () => {
   return (
