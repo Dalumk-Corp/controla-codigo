@@ -3,7 +3,11 @@ import React, { useState, useEffect } from 'react';
 import { Bot, LineChart, Loader2, Plus } from 'lucide-react';
 import Card from '../components/ui/Card';
 import { analyzeFinancialData } from '../services/geminiService';
-import { createClient } from './src/supabaseClient'; // Importe seu cliente aqui
+
+// CORREÇÃO AQUI: 
+// 1. Mudamos de { createClient } para { supabase }
+// 2. Mudamos o caminho para '../' (sobe da pasta pages para a src)
+import { supabase } from '../supabaseClient';
 
 
 const MeuDinheiro: React.FC = () => {
